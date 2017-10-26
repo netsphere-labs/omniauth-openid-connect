@@ -42,6 +42,7 @@ module OmniAuth
       option :send_nonce, true
       option :send_scope_to_token_endpoint, true
       option :client_auth_method
+      option :jwt
 
       uid { user_info.sub }
 
@@ -124,6 +125,7 @@ module OmniAuth
             state: new_state,
             nonce: (new_nonce if options.send_nonce),
             hd: options.hd,
+            jwt: options.jwt,
         }
         client.authorization_uri(opts.reject{|k,v| v.nil?})
       end
