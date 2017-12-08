@@ -128,8 +128,10 @@ module OmniAuth
       end
 
       def public_key
-        return config.jwks if options.discovery
-        key_or_secret
+        # Для дальнейшего изучения
+        # return config.jwks if options.discovery
+        # key_or_secret
+        config.jwks
       end
 
       private
