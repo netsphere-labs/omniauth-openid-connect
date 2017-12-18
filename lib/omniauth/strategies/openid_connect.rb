@@ -82,6 +82,10 @@ module OmniAuth
       end
 
       def request_phase
+        if client_options.scheme == "http"
+          WebFinger.url_builder = URI::HTTP
+          SWD.url_builder = URI::HTTP
+        end
         options.issuer = issuer if options.issuer.blank?
         discover! if options.discovery
         redirect authorize_uri
