@@ -180,13 +180,19 @@ module OmniAuth
         @public_key ||= begin
           if options.discovery
             config.jwks
-          else
+          elsif key_or_secret
             key_or_secret
+          elsif client_options.jwks_uri
+            fetch_key
           end
         end
       end
 
       private
+
+      def fetch_key
+        @fetch_key ||= parse_jwk_key(::OpenIDConnect.http_client.get_content(client_options.jwks_uri))
+      end
 
       def issuer
         resource = "#{ client_options.scheme }://#{ client_options.host }"
@@ -297,16 +303,17 @@ module OmniAuth
       end
 
       def key_or_secret
-        case options.client_signing_alg
-        when :HS256, :HS384, :HS512
-          client_options.secret
-        when :RS256, :RS384, :RS512
-          if options.client_jwk_signing_key
-            parse_jwk_key(options.client_jwk_signing_key)
-          elsif options.client_x509_signing_key
-            parse_x509_key(options.client_x509_signing_key)
+        @key_or_secret ||=
+          case options.client_signing_alg
+          when :HS256, :HS384, :HS512
+            client_options.secret
+          when :RS256, :RS384, :RS512
+            if options.client_jwk_signing_key
+              parse_jwk_key(options.client_jwk_signing_key)
+            elsif options.client_x509_signing_key
+              parse_x509_key(options.client_x509_signing_key)
+            end
           end
-        end
       end
 
       def parse_x509_key(key)
