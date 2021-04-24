@@ -1,3 +1,8 @@
+# v0.4.0 (04.23.2021)
+
+- [Fetch key from JWKS URI if available](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/3)
+- [Fix handling of JWT without key ID](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/2)
+
 # v0.3.5 (07.06.2020)
 
 - bugfix: Info from decoded id_token is not exposed into `request.env['omniauth.auth']` [#61](https://github.com/m0n9oose/omniauth_openid_connect/pull/61)
