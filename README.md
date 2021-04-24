@@ -1,5 +1,9 @@
 # OmniAuth::OpenIDConnect
 
+This project was forked from
+[m0n9oose/omniauth_openid_connect](https://github.com/m0n9oose/omniauth_openid_connect)
+since a number of important bug fixes have not been merged in the past year.
+
 Originally was [omniauth-openid-connect](https://github.com/jjbohn/omniauth-openid-connect)
 
 I've forked this repository and launch as separate gem because maintaining of original was dropped.
@@ -10,7 +14,7 @@ I've forked this repository and launch as separate gem because maintaining of or
 
 Add this line to your application's Gemfile:
 
-    gem 'omniauth_openid_connect'
+    gem 'gitlab-omniauth-openid-connect', require: 'omniauth_openid_connect'
 
 And then execute:
 
@@ -19,7 +23,7 @@ And then execute:
 Or install it yourself as:
 
     $ gem install omniauth_openid_connect
-    
+
 ## Supported Ruby Versions
 
 OmniAuth::OpenIDConnect is tested under 2.4, 2.5, 2.6, 2.7
