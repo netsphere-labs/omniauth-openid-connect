@@ -2,6 +2,7 @@
 
 - [Fetch key from JWKS URI if available](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/3)
 - [Fix handling of JWT without key ID](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/2)
+- [Add .gitlab-ci.yml and test with Ruby 3.0](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/1)
 
 # v0.3.5 (07.06.2020)
 
