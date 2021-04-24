@@ -5,13 +5,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'omniauth/openid_connect/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'omniauth_openid_connect'
+  spec.name          = 'gitlab-omniauth-openid-connect'
   spec.version       = OmniAuth::OpenIDConnect::VERSION
   spec.authors       = ['John Bohn', 'Ilya Shcherbinin']
   spec.email         = ['jjbohn@gmail.com', 'm0n9oose@gmail.com']
   spec.summary       = 'OpenID Connect Strategy for OmniAuth'
   spec.description   = 'OpenID Connect Strategy for OmniAuth.'
-  spec.homepage      = 'https://github.com/m0n9oose/omniauth_openid_connect'
+  spec.homepage      = 'https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")
