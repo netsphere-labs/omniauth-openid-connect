@@ -1,3 +1,9 @@
+# v0.5.0 (05.07.2021)
+
+- [Add email_verified field to info dict](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/7)
+- [Simplify error handling for decoding individual keys](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/6)
+- [Always convert client_signing_alg to be a symbol](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/5)
+
 # v0.4.0 (04.23.2021)
 
 - [Fetch key from JWKS URI if available](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/3)
