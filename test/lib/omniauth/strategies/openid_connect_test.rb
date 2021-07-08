@@ -168,7 +168,7 @@ module OmniAuth
 
         strategy.options.issuer = 'example.com'
         strategy.options.client_signing_alg = :RS256
-        strategy.options.client_jwk_signing_key = File.read('test/fixtures/jwks.json')
+        strategy.options.client_jwk_signing_key = jwks.to_s
         strategy.options.response_type = 'code'
 
         strategy.unstub(:user_info)
@@ -177,7 +177,7 @@ module OmniAuth
         access_token.stubs(:refresh_token)
         access_token.stubs(:expires_in)
         access_token.stubs(:scope)
-        access_token.stubs(:id_token).returns(File.read('test/fixtures/id_token.txt'))
+        access_token.stubs(:id_token).returns(jwt.to_s)
         client.expects(:access_token!).at_least_once.returns(access_token)
         access_token.expects(:userinfo!).returns(user_info)
 
@@ -192,14 +192,13 @@ module OmniAuth
       end
 
       def test_callback_phase_with_id_token
-        code = SecureRandom.hex(16)
         state = SecureRandom.hex(16)
-        request.stubs(:params).returns('id_token' => code, 'state' => state)
+        request.stubs(:params).returns('id_token' => jwt.to_s, 'state' => state)
         request.stubs(:path_info).returns('')
 
         strategy.options.issuer = 'example.com'
         strategy.options.client_signing_alg = :RS256
-        strategy.options.client_jwk_signing_key = File.read('test/fixtures/jwks.json')
+        strategy.options.client_jwk_signing_key = jwks.to_json
         strategy.options.response_type = 'id_token'
 
         strategy.unstub(:user_info)
@@ -208,7 +207,7 @@ module OmniAuth
         access_token.stubs(:refresh_token)
         access_token.stubs(:expires_in)
         access_token.stubs(:scope)
-        access_token.stubs(:id_token).returns(File.read('test/fixtures/id_token.txt'))
+        access_token.stubs(:id_token).returns(jwt.to_s)
 
         id_token = stub('OpenIDConnect::ResponseObject::IdToken')
         id_token.stubs(:raw_attributes).returns('sub' => 'sub', 'name' => 'name', 'email' => 'email')
@@ -221,19 +220,76 @@ module OmniAuth
       end
 
       def test_callback_phase_with_id_token_no_kid
-        rsa_private = OpenSSL::PKey::RSA.generate(2048)
         other_rsa_private = OpenSSL::PKey::RSA.generate(2048)
 
-        key = JSON::JWK.new(rsa_private)
+        key = JSON::JWK.new(private_key)
         other_key = JSON::JWK.new(other_rsa_private)
-        token = JSON::JWT.new(payload).sign(rsa_private, :RS256).to_s
         state = SecureRandom.hex(16)
-        request.stubs(:params).returns('id_token' => token, 'state' => state)
+        request.stubs(:params).returns('id_token' => jwt.to_s, 'state' => state)
         request.stubs(:path_info).returns('')
 
         strategy.options.issuer = issuer
         strategy.options.client_signing_alg = :RS256
         strategy.options.client_jwk_signing_key = { 'keys' => [other_key, key] }.to_json
+        strategy.options.response_type = 'id_token'
+
+        strategy.unstub(:user_info)
+        strategy.call!('rack.session' => { 'omniauth.state' => state, 'omniauth.nonce' => nonce })
+        strategy.callback_phase
+      end
+
+      def test_callback_phase_with_id_token_with_kid
+        other_rsa_private = OpenSSL::PKey::RSA.generate(2048)
+
+        key = JSON::JWK.new(private_key)
+        other_key = JSON::JWK.new(other_rsa_private)
+        state = SecureRandom.hex(16)
+        jwt_with_kid = JSON::JWT.new(payload).sign(key, :RS256)
+        request.stubs(:params).returns('id_token' => jwt_with_kid.to_s, 'state' => state)
+        request.stubs(:path_info).returns('')
+
+        strategy.options.issuer = issuer
+        strategy.options.client_signing_alg = :RS256
+        strategy.options.client_jwk_signing_key = { 'keys' => [other_key, key] }.to_json
+        strategy.options.response_type = 'id_token'
+
+        strategy.unstub(:user_info)
+        strategy.call!('rack.session' => { 'omniauth.state' => state, 'omniauth.nonce' => nonce })
+        strategy.callback_phase
+      end
+
+      def test_callback_phase_with_id_token_with_kid_and_no_matching_kid
+        other_rsa_private = OpenSSL::PKey::RSA.generate(2048)
+
+        key = JSON::JWK.new(private_key)
+        other_key = JSON::JWK.new(other_rsa_private)
+        state = SecureRandom.hex(16)
+        jwt_with_kid = JSON::JWT.new(payload).sign(key, :RS256)
+        request.stubs(:params).returns('id_token' => jwt_with_kid.to_s, 'state' => state)
+        request.stubs(:path_info).returns('')
+
+        strategy.options.issuer = issuer
+        strategy.options.client_signing_alg = :RS256
+        # We use private_key here instead of the wrapped key, which contains a kid
+        strategy.options.client_jwk_signing_key = { 'keys' => [other_key, private_key] }.to_json
+        strategy.options.response_type = 'id_token'
+
+        strategy.unstub(:user_info)
+        strategy.call!('rack.session' => { 'omniauth.state' => state, 'omniauth.nonce' => nonce })
+
+        assert_raises JSON::JWK::Set::KidNotFound do
+          strategy.callback_phase
+        end
+      end
+
+      def test_callback_phase_with_id_token_with_hs256
+        state = SecureRandom.hex(16)
+        request.stubs(:params).returns('id_token' => jwt_with_hs256.to_s, 'state' => state)
+        request.stubs(:path_info).returns('')
+
+        strategy.options.issuer = issuer
+        strategy.options.client_options.secret = hmac_secret
+        strategy.options.client_signing_alg = :HS256
         strategy.options.response_type = 'id_token'
 
         strategy.unstub(:user_info)
@@ -266,11 +322,9 @@ module OmniAuth
       end
 
       def test_callback_phase_with_discovery
-        code = SecureRandom.hex(16)
         state = SecureRandom.hex(16)
-        jwks = JSON::JWK::Set.new(JSON.parse(File.read('test/fixtures/jwks.json'))['keys'])
 
-        request.stubs(:params).returns('code' => code, 'state' => state)
+        request.stubs(:params).returns('code' => jwt.to_s, 'state' => state)
         request.stubs(:path_info).returns('')
 
         strategy.options.client_options.host = 'example.com'
@@ -285,7 +339,7 @@ module OmniAuth
         config.stubs(:token_endpoint).returns('https://example.com/token')
         config.stubs(:userinfo_endpoint).returns('https://example.com/userinfo')
         config.stubs(:jwks_uri).returns('https://example.com/jwks')
-        config.stubs(:jwks).returns(jwks)
+        config.stubs(:jwks).returns(JSON::JWK::Set.new(jwks['keys']))
 
         ::OpenIDConnect::Discovery::Provider::Config.stubs(:discover!).with('https://example.com/').returns(config)
 
@@ -300,7 +354,7 @@ module OmniAuth
         access_token.stubs(:refresh_token)
         access_token.stubs(:expires_in)
         access_token.stubs(:scope)
-        access_token.stubs(:id_token).returns(File.read('test/fixtures/id_token.txt'))
+        access_token.stubs(:id_token).returns(jwt.to_s)
         client.expects(:access_token!).at_least_once.returns(access_token)
         access_token.expects(:userinfo!).returns(user_info)
 
@@ -309,9 +363,9 @@ module OmniAuth
       end
 
       def test_callback_phase_with_jwks_uri
-        code = SecureRandom.hex(16)
+        id_token = jwt.to_s
         state = SecureRandom.hex(16)
-        request.stubs(:params).returns('id_token' => code, 'state' => state)
+        request.stubs(:params).returns('id_token' => id_token, 'state' => state)
         request.stubs(:path_info).returns('')
 
         strategy.options.issuer = 'example.com'
@@ -321,7 +375,7 @@ module OmniAuth
         HTTPClient
           .any_instance.stubs(:get_content)
           .with(strategy.options.client_options.jwks_uri)
-          .returns(File.read('test/fixtures/jwks.json'))
+          .returns(jwks.to_json)
 
         strategy.unstub(:user_info)
         access_token = stub('OpenIDConnect::AccessToken')
@@ -329,7 +383,7 @@ module OmniAuth
         access_token.stubs(:refresh_token)
         access_token.stubs(:expires_in)
         access_token.stubs(:scope)
-        access_token.stubs(:id_token).returns(File.read('test/fixtures/id_token.txt'))
+        access_token.stubs(:id_token).returns(id_token)
 
         id_token = stub('OpenIDConnect::ResponseObject::IdToken')
         id_token.stubs(:raw_attributes).returns('sub' => 'sub', 'name' => 'name', 'email' => 'email')
@@ -494,7 +548,7 @@ module OmniAuth
       def test_credentials
         strategy.options.issuer = 'example.com'
         strategy.options.client_signing_alg = :RS256
-        strategy.options.client_jwk_signing_key = File.read('test/fixtures/jwks.json')
+        strategy.options.client_jwk_signing_key = jwks.to_json
 
         id_token = stub('OpenIDConnect::ResponseObject::IdToken')
         id_token.stubs(:verify!).returns(true)
@@ -505,7 +559,7 @@ module OmniAuth
         access_token.stubs(:refresh_token).returns(SecureRandom.hex(16))
         access_token.stubs(:expires_in).returns(Time.now)
         access_token.stubs(:scope).returns('openidconnect')
-        access_token.stubs(:id_token).returns(File.read('test/fixtures/id_token.txt'))
+        access_token.stubs(:id_token).returns(jwt.to_s)
 
         client.expects(:access_token!).returns(access_token)
         access_token.expects(:refresh_token).returns(access_token.refresh_token)
@@ -592,11 +646,11 @@ module OmniAuth
         strategy.options.issuer = 'foobar.com'
         strategy.options.client_auth_method = :not_basic
         strategy.options.client_signing_alg = :RS256
-        strategy.options.client_jwk_signing_key = File.read('test/fixtures/jwks.json')
+        strategy.options.client_jwk_signing_key = jwks.to_json
 
         json_response = {
           access_token: 'test_access_token',
-          id_token: File.read('test/fixtures/id_token.txt'),
+          id_token: jwt.to_s,
           token_type: 'Bearer',
         }.to_json
         success = Struct.new(:status, :body).new(200, json_response)
@@ -619,16 +673,14 @@ module OmniAuth
 
       def test_public_key_with_jwks
         strategy.options.client_signing_alg = :RS256
-        strategy.options.client_jwk_signing_key = File.read('./test/fixtures/jwks.json')
+        strategy.options.client_jwk_signing_key = jwks.to_json
 
         assert_equal JSON::JWK::Set, strategy.public_key.class
       end
 
       def test_public_key_with_jwk
         strategy.options.client_signing_alg = :RS256
-        jwks_str = File.read('./test/fixtures/jwks.json')
-        jwks = JSON.parse(jwks_str)
-        jwk = jwks['keys'].first
+        jwk = jwks[:keys].first
         strategy.options.client_jwk_signing_key = jwk.to_json
 
         assert_equal JSON::JWK, strategy.public_key.class
@@ -653,16 +705,7 @@ module OmniAuth
 
         id_token = stub('OpenIDConnect::ResponseObject::IdToken')
         id_token.stubs(:verify!).returns(true)
-        id_token.stubs(:raw_attributes, :to_h).returns(
-          {
-            "iss": "http://server.example.com",
-            "sub": "248289761001",
-            "aud": "s6BhdRkqt3",
-            "nonce": "n-0S6_WzA2Mj",
-            "exp": 1311281970,
-            "iat": 1311280970,
-          }
-        )
+        id_token.stubs(:raw_attributes, :to_h).returns(payload)
 
         request.stubs(:params).returns('state' => state, 'nounce' => nonce, 'id_token' => id_token)
         request.stubs(:path_info).returns('')
