@@ -1,3 +1,7 @@
+# v0.6.0 (07.08.2021)
+
+- [Support verification of HS256-signed JWTs](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/8)
+
 # v0.5.0 (05.07.2021)
 
 - [Add email_verified field to info dict](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/7)
