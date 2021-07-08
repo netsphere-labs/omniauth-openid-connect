@@ -27,6 +27,30 @@ class StrategyTestCase < MiniTest::Test
     }
   end
 
+  def private_key
+    @private_key ||= OpenSSL::PKey::RSA.generate(512)
+  end
+
+  def jwt
+    @jwt ||= JSON::JWT.new(payload).sign(private_key, :RS256)
+  end
+
+  def hmac_secret
+    @hmac_secret ||= SecureRandom.hex(16)
+  end
+
+  def jwt_with_hs256
+    @jwt_with_hs256 ||= JSON::JWT.new(payload).sign(hmac_secret, :HS256)
+  end
+
+  def jwks
+    @jwks ||= begin
+      key = JSON::JWK.new(private_key)
+      keyset = JSON::JWK::Set.new(key)
+      { keys: keyset }
+    end
+  end
+
   def user_info
     @user_info ||= OpenIDConnect::ResponseObject::UserInfo.new(
       sub: SecureRandom.hex(16),

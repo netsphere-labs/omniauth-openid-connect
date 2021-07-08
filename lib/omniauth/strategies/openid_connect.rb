@@ -236,31 +236,55 @@ module OmniAuth
         @access_token
       end
 
+      # Unlike ::OpenIDConnect::ResponseObject::IdToken.decode, this
+      # method splits the decoding and verification of JWT into two
+      # steps. First, we decode the JWT without verifying it to
+      # determine the algorithm used to sign. Then, we verify it using
+      # the appropriate public key (e.g. if algorithm is RS256) or
+      # shared secret (e.g. if algorithm is HS256).  This works around a
+      # limitation in the openid_connect gem:
+      # https://github.com/nov/openid_connect/issues/61
       def decode_id_token(id_token)
-        decode!(id_token, public_key)
+        decoded = JSON::JWT.decode(id_token, :skip_verification)
+        algorithm = decoded.algorithm.to_sym
+
+        keyset =
+          case algorithm
+          when :RS256, :RS384, :RS512
+            public_key
+          when :HS256, :HS384, :HS512
+            client_options.secret
+          end
+
+        decoded.verify!(keyset)
+        ::OpenIDConnect::ResponseObject::IdToken.new(decoded)
       rescue JSON::JWK::Set::KidNotFound
-        # Either the JWT doesn't have kid specified or the set of keys doesn't
-        # have a matching key. Since we can't tell the first case from the second,
-        # try each key individually to see if one works.
+        # If the JWT has a key ID (kid), then we know that the set of
+        # keys supplied doesn't contain the one we want, and we're
+        # done. However, if there is no kid, then we try each key
+        # individually to see if one works:
         # https://github.com/nov/json-jwt/pull/92#issuecomment-824654949
-        decoded = decode_with_each_key!(id_token)
+        raise if decoded&.header&.key?('kid')
+
+        decoded = decode_with_each_key!(id_token, keyset)
 
         raise unless decoded
 
         decoded
+
       end
 
       def decode!(id_token, key)
         ::OpenIDConnect::ResponseObject::IdToken.decode(id_token, key)
       end
 
-      def decode_with_each_key!(id_token)
-        return unless public_key.is_a?(JSON::JWK::Set)
+      def decode_with_each_key!(id_token, keyset)
+        return unless keyset.is_a?(JSON::JWK::Set)
 
-        public_key.each do |key|
+        keyset.each do |key|
           begin
             decoded = decode!(id_token, key)
-          rescue JSON::JWS::VerificationFailed
+          rescue JSON::JWS::VerificationFailed, JSON::JWS::UnexpectedAlgorithm, JSON::JWS::UnknownAlgorithm
             next
           end
 
@@ -304,7 +328,7 @@ module OmniAuth
       end
 
       def key_or_secret
-        @key_or_secret ||=
+        @key_or_secret ||= begin
           case options.client_signing_alg&.to_sym
           when :HS256, :HS384, :HS512
             client_options.secret
@@ -315,6 +339,7 @@ module OmniAuth
               parse_x509_key(options.client_x509_signing_key)
             end
           end
+        end
       end
 
       def parse_x509_key(key)
