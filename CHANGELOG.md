@@ -1,3 +1,7 @@
+# v0.8.0 (07.16.2021)
+
+- [Add `jwt_secret_base64` option to support binary secrets](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/12)
+
 # v0.7.0 (07.16.2021)
 
 - [Add `jwt_secret` option to support Keycloak private key](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/10)
