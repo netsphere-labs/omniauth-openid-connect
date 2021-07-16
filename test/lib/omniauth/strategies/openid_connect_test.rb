@@ -311,6 +311,20 @@ module OmniAuth
         strategy.callback_phase
       end
 
+      def test_callback_phase_with_hs256_base64_jwt_secret
+        state = SecureRandom.hex(16)
+        request.stubs(:params).returns('id_token' => jwt_with_hs256.to_s, 'state' => state)
+        request.stubs(:path_info).returns('')
+
+        strategy.options.issuer = issuer
+        strategy.options.jwt_secret_base64 = Base64.encode64(hmac_secret)
+        strategy.options.response_type = 'id_token'
+
+        strategy.unstub(:user_info)
+        strategy.call!('rack.session' => { 'omniauth.state' => state, 'omniauth.nonce' => nonce })
+        strategy.callback_phase
+      end
+
       def test_callback_phase_with_id_token_no_matching_key
         rsa_private = OpenSSL::PKey::RSA.generate(2048)
         other_rsa_private = OpenSSL::PKey::RSA.generate(2048)
