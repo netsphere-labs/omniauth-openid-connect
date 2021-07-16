@@ -66,8 +66,8 @@ config.omniauth :openid_connect, {
 | post_logout_redirect_uri     | The logout redirect uri to use per the [session management draft](https://openid.net/specs/openid-connect-session-1_0.html)                                   | no       | empty                      | https://myapp.com/logout/callback                   |
 | uid_field                    | The field of the user info response to be used as a unique id                                                                                                 | no       | 'sub'                      | "sub", "preferred_username"                         |
 | client_options               | A hash of client options detailed in its own section                                                                                                          | yes      |                            |                                                     |
-| jwt_secret | no | client_options.secret | For HMAC with SHA2 (e.g. HS256) signing algorithms, specify the secret used to sign the JWT token. Defaults to the OAuth2 client secret if not specified. For secrets in binary, use `jwt_secret_base64`. |
-| jwt_secret_base64 | no | client_options.secret | For HMAC with SHA2 (e.g. HS256) signing algorithms, specify the base64-encoded secret used to sign the JWT token. Defaults to the OAuth2 client secret if not specified. |
+| jwt_secret | For HMAC with SHA2 (e.g. HS256) signing algorithms, specify the secret used to sign the JWT token. Defaults to the OAuth2 client secret if not specified. For secrets in binary, use `jwt_secret_base64`. | no | client_options.secret | "mysecret" |
+| jwt_secret_base64 | For HMAC with SHA2 (e.g. HS256) signing algorithms, specify the base64-encoded secret used to sign the JWT token. Defaults to the OAuth2 client secret if not specified. `jwt_secret` takes precedence. | no | client_options.secret | "bXlzZWNyZXQ=\n"
 
 ### Client Config Options
 
