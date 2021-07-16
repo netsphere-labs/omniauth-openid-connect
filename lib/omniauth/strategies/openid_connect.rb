@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'addressable/uri'
+require 'base64'
 require 'timeout'
 require 'net/http'
 require 'open-uri'
@@ -38,6 +39,7 @@ module OmniAuth
       option :discovery, false
       option :client_signing_alg # Deprecated since we detect what is used to sign the JWT
       option :jwt_secret
+      option :jwt_secret_base64
       option :client_jwk_signing_key
       option :client_x509_signing_key
       option :scope, [:openid]
@@ -193,10 +195,16 @@ module OmniAuth
       # Some OpenID providers use the OAuth2 client secret as the shared secret, but
       # Keycloak uses a separate key that's stored inside the database.
       def secret
-        options.jwt_secret || client_options.secret
+        options.jwt_secret || base64_decoded_jwt_secret || client_options.secret
       end
 
       private
+
+      def base64_decoded_jwt_secret
+        return unless options.jwt_secret_base64
+
+        Base64.decode64(options.jwt_secret_base64)
+      end
 
       def fetch_key
         @fetch_key ||= parse_jwk_key(::OpenIDConnect.http_client.get_content(client_options.jwks_uri))
