@@ -1,3 +1,7 @@
+# v0.7.0 (07.16.2021)
+
+- [Add `jwt_secret` option to support Keycloak private key](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/10)
+
 # v0.6.0 (07.08.2021)
 
 - [Support verification of HS256-signed JWTs](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/8)
