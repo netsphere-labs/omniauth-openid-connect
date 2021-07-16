@@ -36,7 +36,8 @@ module OmniAuth
 
       option :issuer
       option :discovery, false
-      option :client_signing_alg
+      option :client_signing_alg # Deprecated since we detect what is used to sign the JWT
+      option :jwt_secret
       option :client_jwk_signing_key
       option :client_x509_signing_key
       option :scope, [:openid]
@@ -181,12 +182,18 @@ module OmniAuth
         @public_key ||= begin
           if options.discovery
             config.jwks
-          elsif key_or_secret
-            key_or_secret
+          elsif configured_public_key
+            configured_public_key
           elsif client_options.jwks_uri
             fetch_key
           end
         end
+      end
+
+      # Some OpenID providers use the OAuth2 client secret as the shared secret, but
+      # Keycloak uses a separate key that's stored inside the database.
+      def secret
+        options.jwt_secret || client_options.secret
       end
 
       private
@@ -253,7 +260,7 @@ module OmniAuth
           when :RS256, :RS384, :RS512
             public_key
           when :HS256, :HS384, :HS512
-            client_options.secret
+            secret
           end
 
         decoded.verify!(keyset)
@@ -327,17 +334,12 @@ module OmniAuth
         super
       end
 
-      def key_or_secret
-        @key_or_secret ||= begin
-          case options.client_signing_alg&.to_sym
-          when :HS256, :HS384, :HS512
-            client_options.secret
-          when :RS256, :RS384, :RS512
-            if options.client_jwk_signing_key
-              parse_jwk_key(options.client_jwk_signing_key)
-            elsif options.client_x509_signing_key
-              parse_x509_key(options.client_x509_signing_key)
-            end
+      def configured_public_key
+        @configured_public_key ||= begin
+          if options.client_jwk_signing_key
+            parse_jwk_key(options.client_jwk_signing_key)
+          elsif options.client_x509_signing_key
+            parse_x509_key(options.client_x509_signing_key)
           end
         end
       end
