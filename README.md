@@ -66,6 +66,7 @@ config.omniauth :openid_connect, {
 | post_logout_redirect_uri     | The logout redirect uri to use per the [session management draft](https://openid.net/specs/openid-connect-session-1_0.html)                                   | no       | empty                      | https://myapp.com/logout/callback                   |
 | uid_field                    | The field of the user info response to be used as a unique id                                                                                                 | no       | 'sub'                      | "sub", "preferred_username"                         |
 | client_options               | A hash of client options detailed in its own section                                                                                                          | yes      |                            |                                                     |
+| jwt_secret | no | client_options.secret | For HMAC with SHA2 (e.g. HS256) signing algorithms, specify the secret used to sign the JWT token. Defaults to the OAuth2 client secret if not specified. |
 
 ### Client Config Options
 
