@@ -278,17 +278,6 @@ module OmniAuth
         strategy.options.client_jwk_signing_key = JSON.parse(File.read('test/fixtures/jwks.json'))
         strategy.options.response_type = 'code'
         
-        id_token = ::OpenIDConnect::ResponseObject::IdToken.new(
-          :sub => 'sub', :iss => 'a', :aud => 'a', :exp => 'a', :iat => 'a'
-        ).tap do |id_token|
-            id_token.stubs(:raw_attributes).returns('name' => 'name',
-                                                    'email' => 'email')
-            id_token.stubs(:verify!)
-              .with(issuer: strategy.options.issuer, client_id: @identifier,
-                    nonce: nonce)
-              .returns(true)
-        end
-
         strategy.unstub(:user_info)
         access_token = ::OpenIDConnect::AccessToken.new(
           :access_token => 'a',
@@ -301,9 +290,19 @@ module OmniAuth
         client().expects(:access_token!).at_least_once.returns(access_token)
         access_token.expects(:userinfo!).returns(user_info)
 
+        id_token = ::OpenIDConnect::ResponseObject::IdToken.new(
+          :sub => 'sub', :iss => 'a', :aud => 'a', :exp => 'a', :iat => 'a'
+        ).tap do |id_token|
+            id_token.stubs(:raw_attributes).returns('name' => 'name',
+                                                    'email' => 'email')
+            id_token.stubs(:verify!)
+              .with(issuer: strategy.options.issuer, client_id: @identifier,
+                    nonce: nonce)
+              .returns(true)
+        end
         ::OpenIDConnect::ResponseObject::IdToken.stubs(:decode).returns(id_token)
-        id_token.expects(:verify!)
 
+        id_token.expects(:verify!)
         strategy.call!('rack.session' => { 'omniauth.state' => state,
                                            'omniauth.nonce' => nonce })
         strategy.callback_phase
@@ -380,11 +379,14 @@ module OmniAuth
             :jwks_uri => 'https://example.com/jwks' ).tap do |config|
           config.stubs(:jwks).returns(jwks)
         end
-        ::OpenIDConnect::Discovery::Provider::Config.stubs(:discover!).with('https://example.com/').returns(config)
+        ::OpenIDConnect::Discovery::Provider::Config.stubs(:discover!)
+                               .with('https://example.com/').returns(config)
 
         id_token = ::OpenIDConnect::ResponseObject::IdToken.new(
           :sub => 'sub', :iss => 'a', :aud => 'a', :exp => 'a', :iat => 'a'
         ).tap do |id_token|
+            id_token.stubs(:raw_attributes).returns('name' => 'name',
+                                                    'email' => 'email')
             id_token.stubs(:verify!)
               .with(issuer: 'https://example.com/', client_id: @identifier,
                     nonce: nonce)

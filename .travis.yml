@@ -5,4 +5,6 @@ rvm:
   - 2.7
   - jruby-head
   - ruby-head
+
+# Build gem file.
 script: bundle exec rake build

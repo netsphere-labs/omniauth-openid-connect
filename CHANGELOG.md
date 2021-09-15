@@ -1,4 +1,18 @@
 
+# v0.3.5 (07.06.2020)
+
+- bugfix: Info from decoded id_token is not exposed into `request.env['omniauth.auth']` [#61](https://github.com/m0n9oose/omniauth_openid_connect/pull/61)
+- bugfix: NoMethodError (`undefined method 'count' for #<OpenIDConnect::ResponseObject::IdToken>`) [#60](https://github.com/m0n9oose/omniauth_openid_connect/pull/60)
+
+# v0.3.4 (21.05.2020)
+
+- Try to verify id_token when response_type is code [#44](https://github.com/m0n9oose/omniauth_openid_connect/pull/44)
+- Provide more information on error [#49](https://github.com/m0n9oose/omniauth_openid_connect/pull/49)
+- Update configuration documentation [#53](https://github.com/m0n9oose/omniauth_openid_connect/pull/53)
+- Add documentation about the send_scope_to_token_endpoint config property [#52](https://github.com/m0n9oose/omniauth_openid_connect/pull/52)
+- refactor: take uid_field from raw_attributes [#54](https://github.com/m0n9oose/omniauth_openid_connect/pull/54)
+- chore(ci): add 2.7, ruby-head and jruby-head [#55](https://github.com/m0n9oose/omniauth_openid_connect/pull/55)
+
 # v0.3.3 (09.11.2019)
 
 - Pass `acr_values` to authorize url [#43](https://github.com/m0n9oose/omniauth_openid_connect/pull/43)
