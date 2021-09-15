@@ -442,8 +442,23 @@ module OmniAuth
 
 
       # @override
+      # The UserInfo Request.
+      # Example of a UserInfo Response:
+      #   {
+      #     "sub": "248289761001",
+      #     "name": "Jane Doe",
+      #     "given_name": "Jane",
+      #     "family_name": "Doe",
+      #     "preferred_username": "j.doe",
+      #     "email": "janedoe@example.com",
+      #     "picture": "http://example.com/janedoe/me.jpg"
+      #   }
       def user_info
-        @user_info ||= access_token.userinfo!
+        return @user_info if @user_info
+
+        # openidconnect package: openid_connect/access_token.rb
+        @user_info = access_token.userinfo!
+        return @user_info
       end
 
       # Google sends the string "true" as the value for the field 
@@ -461,6 +476,9 @@ module OmniAuth
       
 
       # callback_phase() から呼び出される.
+      # The Authorization Code Flow
+      # response_type = 'code'
+      #
       # @return [Rack::OAuth2::AccessToken] アクセストークン
       #         'oauth2'パッケージの OAuth2::AccessToken クラスとは別物.
       # @raise [OmniAuth::OpenIDConnect::MissingCodeError] code がない.
@@ -596,7 +614,7 @@ module OmniAuth
         OmniAuth::OpenIDConnect.verify_access_token(
                          params['access_token'], id_token, params['id_token'])
 
-        user_data = decode_id_token(params['id_token']).raw_attributes
+        user_data = id_token.raw_attributes
         env['omniauth.auth'] = AuthHash.new(
           provider: name,
           uid: user_data['sub'],
@@ -616,7 +634,9 @@ module OmniAuth
 
 
       def verify_id_token!(decoded_id_token)
-        raise TypeError if !decoded_id_token.is_a?(::OpenIDConnect::ResponseObject::IdToken)
+        if !decoded_id_token.is_a?(::OpenIDConnect::ResponseObject::IdToken)
+          raise TypeError
+        end
         decoded_id_token.verify!(issuer: issuer,
                                  client_id: client_options.identifier,
                                  nonce: session.delete('omniauth.nonce') )
