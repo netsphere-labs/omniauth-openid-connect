@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.license       = 'MIT'
 
   # v2.3 は 2019-03-31 EOL.
-  spec.required_ruby_version = '>= 2.5'
+  spec.required_ruby_version = '>= 2.7'
   
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
@@ -55,8 +55,8 @@ Gem::Specification.new do |spec|
   # symbolize_keys() 
   #spec.add_dependency 'activesupport', '>= 4.2'
   
-  spec.add_dependency 'omniauth', '~> 1.9'   # omniauth-oauth2 に合わせる
-  spec.add_dependency 'openid_connect', '~> 1.1'
+  spec.add_dependency 'omniauth', '~> 2.0'   # omniauth-oauth2 に合わせる
+  spec.add_dependency 'openid_connect', '~> 1.2.0'
   # CVE-2019-18848 fix.
   spec.add_dependency 'json-jwt', '>= 1.11.0'
 
@@ -78,7 +78,7 @@ Gem::Specification.new do |spec|
   #spec.add_development_dependency 'coveralls'
 
   # simplecov, rubocop, i18n のバージョンを限定
-  spec.add_development_dependency 'faker', '~> 2.1.2'
+  spec.add_development_dependency 'faker', '~> 2.19'
 
   spec.add_development_dependency 'guard'
   spec.add_development_dependency 'guard-bundler'
