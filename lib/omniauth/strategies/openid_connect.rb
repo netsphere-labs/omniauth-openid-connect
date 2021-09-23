@@ -44,7 +44,8 @@ module OmniAuth
                 # Rack::OAuth2::Client
                 redirect_uri: nil,
 
-                # [REQUIRED] authorization_endpoint のホスト.
+                # [OPTIONAL] authorization_endpoint のホスト.
+                #            省略した場合, `issuer` から作られる.
                 # Rack::OAuth2::Client
                 scheme: 'https',
                 host: nil,
@@ -67,7 +68,7 @@ module OmniAuth
       option :jwks_uri, '/jwk'
       option :end_session_endpoint, nil
 
-      # 指定しなかった場合は, client_options.{scheme, host, port} から作られる.
+      # [REQUIRED] IdP (Identity Provider) を識別する URI.
       option :issuer
 
       option :discovery, false
@@ -221,6 +222,9 @@ module OmniAuth
       # client_options から OpenIDConnect::Client インスタンスを構築.
       # @return [OpenIDConnect::Client] サーバとのconnection
       def client
+        if !client_options.host
+          raise TypeError, "internal error: call setup_phase() first"
+        end
         @client ||= ::OpenIDConnect::Client.new(client_options)
       end
 
@@ -242,16 +246,17 @@ module OmniAuth
       # request_phase() と callback_phase() の開始前に呼び出される.
       def setup_phase
         super
-        
-        @issuer = if options.issuer
-                    options.issuer
-                  else
-                    client_options.scheme + '://' + client_options.host +
-                      (client_options.port ? client_options.port.to_s : '')
-                  end
-        unless (uri = URI.parse(@issuer)) &&
+        raise TypeError if !options.issuer.is_a?(String)
+        unless (uri = URI.parse(options.issuer)) &&
                ['http', 'https'].include?(uri.scheme)
           raise ArgumentError, "Invalid issuer URI scheme"
+        end
+        @issuer = options.issuer
+        
+        if !client_options.host
+          client_options.scheme = uri.scheme
+          client_options.host   = uri.host
+          client_options.port   = uri.port
         end
 
         # これは discover!の前に設定.
@@ -267,7 +272,7 @@ module OmniAuth
         end
         if configured_response_type == 'id_token token'
           if client_options.secret
-            raise ArgumentError, "MUST NOT set client_secret on Implicit Flow"
+            raise ArgumentError, "MUST NOT set client_secret on the Implicit Flow"
           end
         end
       end
@@ -329,8 +334,6 @@ module OmniAuth
 
       def other_phase
         if logout_path_pattern.match?(current_path)
-          #options.issuer = issuer if options.issuer.to_s.empty?
-          #discover!
           setup_phase()  # issuer の設定と discover!
           return redirect(end_session_uri) if end_session_uri
         end
@@ -409,8 +412,7 @@ module OmniAuth
 
     private ##############################################
 
-      # @return [String] options.issuer または client_options からつくった
-      #                  issuer.
+      # @return [String] options.issuer 値.
       # 設定は setup_phase() 内で行う.
       attr_reader :issuer
 

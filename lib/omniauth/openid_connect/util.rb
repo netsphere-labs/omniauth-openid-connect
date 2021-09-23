@@ -64,6 +64,7 @@ module OmniAuth
       raise TypeError if !access_token.is_a?(String)
       raise TypeError if !raw_id_token.is_a?(String)
 
+      # If error, JSON::JWT::InvalidFormat
       jwt = JSON::JWT.decode raw_id_token, :skip_verification
       hash_length = jwt.alg[2, 3].to_i
       if decoded_id_token.at_hash !=

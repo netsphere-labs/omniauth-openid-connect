@@ -98,8 +98,8 @@ See https://www.nslabs.jp/omniauth-openid-connect.rhtml
 
 | Field                        | Description                         | Required | Default                           |
 |------------------------------|-------------------------------------|----------|-----------------------------------|
-| name     [Symbol or String]     | Arbitrary string to identify connection and identify it from other openid_connect providers <br />`:my_idp`                            | Yes       | `'openid_connect'`                                                  |
-| issuer                       | Root url for the authorization server    <br />https://myprovider.com                                                                                                                     | yes                                 |                               |
+| name     [Symbol or String]  | Arbitrary string to identify connection and identify it from other openid_connect providers <br />`:my_idp`                            | Yes       | `'openid_connect'`                                                  |
+| issuer [String]              | IdP identifier URI     <br />`https://auth.login.yahoo.co.jp/yconnect/v2`                                                              | Yes       | --                              |
 | discovery                    | Should OpenID discovery be used. This is recommended if the IDP provides a discovery endpoint. See client config for how to manually enter discovered values. <br />one of: true, false | no       | false                                                   |
 | client_auth_method           | Which authentication method to use to authenticate your app with the authorization server <br />"basic", "jwks"                                                                    | no       | Sym: basic                                                  |
 | scope                        | Which OpenID scopes to include (`:openid` is always required)  <br />[:openid, :profile, :email]                                                                                                 | no       | Array<sym> [:openid]                          |
@@ -145,9 +145,9 @@ These are the configuration options for the client_options hash of the configura
 | identifier             | The OAuth2 client_id                                            |            |                        |
 | secret                 | The OAuth2 client secret                                        |            |                        |
 | redirect_uri           | The OAuth2 authorization callback url in your app               |            |                        |
-| scheme                 | The http scheme to use                                          | https      |                        |
-| host                   | The host of the authorization server                            | nil        |                        |
-| port                   | The port for the authorization server                           | 443        |                        |
+| scheme                 | The http scheme to use. If not set, built by `options.issuer`   | https      |                        |
+| host                   | The host of the authorization server. If not set, built by `options.issuer`    | nil        |                        |
+| port                   | The port for the authorization server. If not set, built by `options.issuer`   | nil        |                        |
 | authorization_endpoint | The authorize endpoint on the authorization server              | /authorize | yes                    |
 | token_endpoint         | The token endpoint on the authorization server                  | /token     | yes                    |
 | userinfo_endpoint      | The user info endpoint on the authorization server              | /userinfo  | yes                    |
