@@ -8,7 +8,16 @@ Authentication strategy using OpenID Connect for OmniAuth.
 [![Build Status](https://travis-ci.com/netsphere-labs/omniauth-openid-connect.svg?branch=master)](https://travis-ci.com/netsphere-labs/omniauth-openid-connect)
 
 
-The original is [jjbohn/omniauth-openid-connect](https://github.com/jjbohn/omniauth-openid-connect). I gathered the changes that were scattered in many places and integrated them here. In particular, [Shopify/omniauth-identity](https://github.com/Shopify/omniauth-identity), [patatoid/omniauth-openid-reconnect](https://github.com/patatoid/omniauth-openid-reconnect) and [m0n9oose/omniauth_openid_connect](https://github.com/m0n9oose/omniauth_openid_connect). And this package is the successor to the following: 'omniauth-google-oauth2', 'omniauth-yahoojp', 'omniauth-azure-oauth2', 'omniauth-azure-adv2', 'omniauth-line' and 'omniauth-line-openid-connect'.
+The original is [jjbohn/omniauth-openid-connect](https://github.com/jjbohn/omniauth-openid-connect). I gathered the changes that were scattered in many places and integrated them here. In particular, [Shopify/omniauth-identity](https://github.com/Shopify/omniauth-identity), [patatoid/omniauth-openid-reconnect](https://github.com/patatoid/omniauth-openid-reconnect) and [m0n9oose/omniauth_openid_connect](https://github.com/m0n9oose/omniauth_openid_connect). 
+
+This package is the successor to the following: 
+ - omniauth-google-oauth2
+ - omniauth-yahoojp
+ - omniauth-azure-oauth2
+ - omniauth-azure-adv2
+ - omniauth-line 
+ - omniauth-line-openid-connect
+ - omniauth-salesforce
 
 **Important:** OmniAuth v1.9.1 and earlier is vulnerable to Cross-Site Request Forgery. Application developers need to avoid this vulnerability. See [CVE-2015-9284](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-9284), [Resolving CVE 2015 9284 · omniauth/omniauth Wiki](https://github.com/omniauth/omniauth/wiki/Resolving-CVE-2015-9284).
 
