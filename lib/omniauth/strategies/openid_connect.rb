@@ -459,6 +459,8 @@ module OmniAuth
         return @user_info if @user_info
 
         # openidconnect package: openid_connect/access_token.rb
+        return {} if !access_token
+        raise TypeError, "internal error" if !access_token.is_a?(::OpenIDConnect::AccessToken)
         @user_info = access_token.userinfo!
         return @user_info
       end
@@ -602,7 +604,8 @@ module OmniAuth
       # (2) access token を id_token によって検証しなければならない.
       def implicit_flow_callback_phase
         if !params['access_token'] || !params['id_token']
-          raise OmniAuth::OpenIDConnect::MissingIdTokenError, "Missing 'access_token' or 'id_token' param"
+          raise OmniAuth::OpenIDConnect::MissingIdTokenError,
+                "Missing 'access_token' or 'id_token' param"
         end
 
         # このなかで署名の検証も行う. => JSON::JWS::VerificationFailed
@@ -615,14 +618,8 @@ module OmniAuth
         # さらに, access token を検証しなければならない.
         OmniAuth::OpenIDConnect.verify_access_token(
                          params['access_token'], id_token, params['id_token'])
-
-        user_data = id_token.raw_attributes
-        env['omniauth.auth'] = AuthHash.new(
-          provider: name,
-          uid: user_data['sub'],
-          info: { name: user_data['name'], email: user_data['email'] },
-          extra: { raw_info: user_data }
-        )
+        @access_token = ::OpenIDConnect::AccessToken.new client: client,
+                                         access_token: params['access_token']
       end
 
 

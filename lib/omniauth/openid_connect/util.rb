@@ -58,6 +58,10 @@ module OmniAuth
       end
     end
 
+    def self.left_half_hash_of(string, hash_length)
+      digest = OpenSSL::Digest.new("SHA#{hash_length}").digest string
+      Base64.urlsafe_encode64 digest[0, hash_length / (2 * 8)], padding: false
+    end
 
     # access token を id_token によって 検証 (validation) する.
     def self.verify_access_token(access_token, decoded_id_token, raw_id_token)
