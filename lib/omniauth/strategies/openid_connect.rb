@@ -35,8 +35,8 @@ module OmniAuth
                 # Rack::OAuth2::Client
                 identifier: nil,
 
-                # Authentication Request: [REQUIRED] client_secret
-                # On Implicit Flow, MUST NOT set this option.
+                # For the Authorization Code Flow: [REQUIRED] client_secret
+                # For the Implicit Flow:    MUST NOT set this option.
                 # Rack::OAuth2::Client
                 secret: nil,
 
@@ -65,8 +65,8 @@ module OmniAuth
                 expires_in: nil,   # client_options に渡す
             )
 
+      # [OPTIONAL] discovery で更新される.
       option :jwks_uri, '/jwk'
-      option :end_session_endpoint, nil
 
       # [REQUIRED] IdP (Identity Provider) を識別する URI.
       option :issuer
@@ -90,8 +90,10 @@ module OmniAuth
       # Authentication Request: [REQUIRED]
       # OpenID Connect は、拡張された複数 response_type を使う.
       # See https://openid.net/specs/oauth-v2-multiple-response-types-1_0.html
-      # ただし, Webアプリでは 'code' 決め打ちでよい.
-      # See http://oauth.jp/blog/2015/01/06/oauth2-multiple-response-type/
+      #
+      # Webアプリでは 'code' 決め打ちでよい.
+      # クライアントから直接 IdP に振る場合は, client_secret を持つわけにいか
+      # ないので, Implicit Flow にしなければならない. 
       option :response_type, 'code'     # one of 'code', ['id_token', 'token']
 
       # Authentication Request: [RECOMMENDED]
@@ -146,8 +148,10 @@ module OmniAuth
       # 仕様では grant_type, code, redirect_uri パラメータのみ.
       option :send_scope_to_token_endpoint, false
 
-      # token_endpoint へのリクエスト.
+      # token_endpoint へのリクエストの際の, クライアント認証方式.
       # One of...
+      #   Value            `token_endpoint_auth_methods_supported` value
+      #   -------------    ---------------------------------------------------
       #   :basic           "client_secret_basic": The client uses HTTP Basic.
       #   :jwt_bearer
       #   :saml2_bearer
@@ -157,11 +161,23 @@ module OmniAuth
       #   n/a              "none": The client is a public client as defined in
       #                    OAuth 2.0, Section 2.1, and does not have a client
       #                    secret.
-      # default value is :basic
+      # default value is `:basic`
       # See Rack::OAuth2::Client
       # RFC 8414 `token_endpoint_auth_methods_supported` のなかから選ぶ.
+      # `private_key_jwt` is not supported.
+      # Financial-grade API (FAPI) では `client_secret_basic`, `client_secret_post` は禁止.
       option :client_auth_method
 
+      ##############################
+      # OpenID Connect RP-Initiated Logout 1.0
+
+      # [OPTIONAL] The OP's Logout Endpoint. This URL is normally obtained via
+      # the `end_session_endpoint` element of the OP's Discovery response.
+      # discovery で更新される.
+      option :end_session_endpoint, nil
+
+      # OPでのログアウト後、リダイレクトバックしてもらうとき, 必須.
+      # OP にあらかじめ登録してあるURI と完全一致しなければならない.
       option :post_logout_redirect_uri
 
       # Any field from user_info to be processed as UID
@@ -347,7 +363,7 @@ module OmniAuth
       def end_session_uri
         return unless end_session_endpoint_is_valid?
 
-        end_session_uri = URI(client_options.end_session_endpoint)
+        end_session_uri = URI(options.end_session_endpoint)
         end_session_uri.query = encoded_post_logout_redirect_uri
         end_session_uri.to_s
       end
@@ -576,18 +592,21 @@ module OmniAuth
       # [Security issue] Do not use params['redirect_uri']
       #def redirect_uri
 
-      
-      def encoded_post_logout_redirect_uri
-        return unless options.post_logout_redirect_uri
 
+      # @return [String] クエリパラメータ.
+      def encoded_post_logout_redirect_uri
+        return nil unless options.post_logout_redirect_uri
+
+        # post_logout_redirect_uri を指定する場合は, id_token_hint 必須.
         URI.encode_www_form(
+          id_token_hint: raise("Not Implemented Error"), # TODO: impl. [REQUIRED] hintなのに必須とはどういうこと?
           post_logout_redirect_uri: options.post_logout_redirect_uri
         )
       end
 
       def end_session_endpoint_is_valid?
-        client_options.end_session_endpoint &&
-          client_options.end_session_endpoint =~ URI::DEFAULT_PARSER.make_regexp
+        options.end_session_endpoint &&
+          options.end_session_endpoint =~ URI::DEFAULT_PARSER.make_regexp
       end
 
       def logout_path_pattern
@@ -624,11 +643,12 @@ module OmniAuth
 
 
       def configured_response_type
-        @configured_response_type ||= if options.response_type.is_a?(Array)
-                                        options.response_type.sort.join(' ')
-                                      else
-                                        options.response_type.to_s
-                                      end
+        if !@configured_response_type
+          ary = options.response_type.is_a?(Array) ? options.response_type :
+                                        options.response_type.split(/[ \t]+/)
+          @configured_response_type = ary.sort.join(' ')
+        end
+        return @configured_response_type
       end
 
 

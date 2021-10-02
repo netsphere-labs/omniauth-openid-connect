@@ -311,8 +311,12 @@ module OmniAuth
 
       # Implicit Flow では, id_token と access token がいっしょに来る.
       # id_token の署名と, access token の両方を検証する.
+      # TODO: Implicit Flow では IdP の公開鍵で検証する。テストには、自前の秘密鍵でid_token を作ってやらないといけない. ほんで, 公開鍵とその id_token のペアでテストする.
       def test_callback_phase_implicit_flow
-        code1 = SecureRandom.hex(16) # id_token
+        code1 = File.read('test/fixtures/id_token.txt') # id_token
+        puts JSON::JWT.decode code1 # DEBUG DEBUG
+            # -> JSON::JWT::InvalidFormat: Invalid JSON Format ●●アカンやん.
+        
         code2 = SecureRandom.hex(16) # access token
         state = SecureRandom.hex(16)
         nonce = SecureRandom.hex(16)
@@ -333,7 +337,7 @@ module OmniAuth
           #access_token.stubs(:refresh_token)
           #access_token.stubs(:expires_in)
           #access_token.stubs(:scope)
-          :id_token => File.read('test/fixtures/id_token.txt') )
+          :id_token => code1 )
 
         id_token = ::OpenIDConnect::ResponseObject::IdToken.new(
           :sub => 'sub', :iss => 'a', :aud => 'a', :exp => 'a', :iat => 'a'
@@ -436,7 +440,7 @@ module OmniAuth
                                            'omniauth.nonce' => nonce })
         strategy.expects(:fail!)
         result = strategy.callback_phase
-        assert_kind_of Array, result
+        assert_kind_of Array, result   #●●Expected nil to be a kind of Array, not NilClass.
         assert_equal 302, result.first, 'Expecting redirect to /callback/failure'
       end
 
