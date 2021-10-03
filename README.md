@@ -94,13 +94,16 @@ And then execute:
     
 ### Supported Ruby Versions
 
-<i>OmniAuth::OpenIDConnect renewed</i> is tested under Ruby v2.5, v2.6, v2.7.
+<i>OmniAuth::OpenIDConnect renewed</i> is tested under Ruby v2.5, v2.6, v2.7 and v3.0.
+
 
 
 
 ## Usage
 
-See https://www.nslabs.jp/omniauth-openid-connect.rhtml
+A sample Rails program: https://gitlab.com/netsphere/rails-examples/-/tree/main/omniauth-oidc-rp-sample/
+
+Manual: https://www.nslabs.jp/omniauth-openid-connect.rhtml
 
 
 ### Options Overview
