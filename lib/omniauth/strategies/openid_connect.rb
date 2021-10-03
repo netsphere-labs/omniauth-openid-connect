@@ -644,8 +644,11 @@ module OmniAuth
 
       def configured_response_type
         if !@configured_response_type
-          ary = options.response_type.is_a?(Array) ? options.response_type :
-                                        options.response_type.split(/[ \t]+/)
+          ary = case options.response_type
+                  when Array; options.response_type
+                  when Symbol; [options.response_type]
+                  else options.response_type.split(/[ \t]+/)
+                end
           @configured_response_type = ary.sort.join(' ')
         end
         return @configured_response_type
