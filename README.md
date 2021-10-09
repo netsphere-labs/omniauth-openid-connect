@@ -37,6 +37,14 @@ For more information on OpenID Connect, see [OpenID Connect Core 1.0](https://op
 
 
 
+## Features
+
+<i>OmniAuth::OpenIDConnect renewed</i> is tested under Ruby v2.5, v2.6, v2.7 and v3.0.
+
+Single Sign-On: OpenID Connect Core 1.0 the Authorization Code Flow and the Implicit Flow.
+Single Logout (SLO): OpenID Connect RP-Initiated Logout 1.0.
+
+
 ## Tested OpenID Providers
 
 |Organization  |Implementation   |Note            |
@@ -92,10 +100,6 @@ And then execute:
     $ bundle
 
     
-### Supported Ruby Versions
-
-<i>OmniAuth::OpenIDConnect renewed</i> is tested under Ruby v2.5, v2.6, v2.7 and v3.0.
-
 
 
 
