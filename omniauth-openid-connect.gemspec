@@ -56,7 +56,7 @@ Gem::Specification.new do |spec|
   #spec.add_dependency 'activesupport', '>= 4.2'
   
   spec.add_dependency 'omniauth', '~> 2.0'   # omniauth-oauth2 に合わせる
-  spec.add_dependency 'openid_connect', '~> 1.2.0'
+  spec.add_dependency 'openid_connect', '~> 1.2'
   # CVE-2019-18848 fix.
   spec.add_dependency 'json-jwt', '>= 1.11.0'
 
