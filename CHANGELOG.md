@@ -1,3 +1,7 @@
+# v0.9.1 (01.03.2022)
+
+- [Assume public key encryption unless HMAC is specified](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/19)
+
 # v0.9.0 (01.03.2022)
 
 - [Add support for ES[256|384|512|256K] algorithms](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/17)
