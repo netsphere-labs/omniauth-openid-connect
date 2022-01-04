@@ -265,7 +265,7 @@ module OmniAuth
 
         keyset =
           case algorithm
-          when :RS256, :RS384, :RS512
+          when :ES256, :ES384, :ES512, :ES256K, :RS256, :RS384, :RS512
             public_key
           when :HS256, :HS384, :HS512
             secret
