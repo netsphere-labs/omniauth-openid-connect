@@ -1,3 +1,7 @@
+# v0.9.0 (01.03.2022)
+
+- [Add support for ES[256|384|512|256K] algorithms](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/17)
+
 # v0.8.0 (07.16.2021)
 
 - [Add `jwt_secret_base64` option to support binary secrets](https://gitlab.com/gitlab-org/gitlab-omniauth-openid-connect/-/merge_requests/12)
