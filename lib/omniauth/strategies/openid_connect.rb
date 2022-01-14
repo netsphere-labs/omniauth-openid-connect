@@ -350,7 +350,7 @@ module OmniAuth
         #        fail!(:token_verification_failed, e)
       end
 
-      def on_auth_path
+      def on_auth_path?
         return true if logout_path_pattern.match?(current_path)
         super
       end
