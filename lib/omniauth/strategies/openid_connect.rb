@@ -350,6 +350,11 @@ module OmniAuth
         #        fail!(:token_verification_failed, e)
       end
 
+      def on_auth_path
+        return true if logout_path_pattern.match?(current_path)
+        super
+      end
+
       def other_phase
         if logout_path_pattern.match?(current_path)
           setup_phase # issuer の設定と discover!
@@ -632,7 +637,7 @@ module OmniAuth
 
         # post_logout_redirect_uri を指定する場合は, id_token_hint 必須.
         URI.encode_www_form(
-          id_token_hint: raise('Not Implemented Error'), # TODO: impl. [REQUIRED] hintなのに必須とはどういうこと?
+#          id_token_hint: raise('Not Implemented Error'), # TODO: impl. [REQUIRED] hintなのに必須とはどういうこと?
           post_logout_redirect_uri: options.post_logout_redirect_uri
         )
       end
