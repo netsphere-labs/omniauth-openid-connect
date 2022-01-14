@@ -351,12 +351,15 @@ module OmniAuth
       end
 
       def on_auth_path?
-        return true if logout_path_pattern.match?(current_path)
-        super
+        super || on_logout_path?
+      end
+
+      def on_logout_path?
+        logout_path_pattern.match?(current_path)
       end
 
       def other_phase
-        if logout_path_pattern.match?(current_path)
+        if on_logout_path?
           setup_phase # issuer の設定と discover!
           return redirect(end_session_uri) if end_session_uri
         end
