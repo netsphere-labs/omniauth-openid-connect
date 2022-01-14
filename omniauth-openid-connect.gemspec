@@ -8,9 +8,9 @@ require 'omniauth/openid_connect/version'
 Gem::Specification.new do |spec|
   spec.name          = 'omniauth-openid-connect'
   spec.version       = OmniAuth::OpenIDConnect::VERSION
-  spec.authors       = ['Hisashi Horikawa', 'Paul Scarrone',
+  spec.authors       = ['Ondrej Pialek', 'Hisashi Horikawa', 'Paul Scarrone',
                         'John Bohn', 'Ilya Shcherbinin']
-  spec.email         = ['hisashi.horikawa@gmail.com', 'paul.scarrone@gmail.com',
+  spec.email         = ['ondrej@pialek.eu', 'hisashi.horikawa@gmail.com', 'paul.scarrone@gmail.com',
                         'jjbohn@gmail.com', 'm0n9oose@gmail.com']
   spec.summary       = %q{OpenID Connect Strategy MK2 for OmniAuth}
   spec.description   = %q{OpenID Connect Strategy MK2 for OmniAuth which is fully compliant with Devise and Rails and currently maintained. Derived from jjbohn's work which is not actively maintained}
