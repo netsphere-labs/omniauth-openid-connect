@@ -477,6 +477,7 @@ module OmniAuth
         # openidconnect package: openid_connect/access_token.rb
         return {} if !access_token
         raise TypeError, "internal error" if !access_token.is_a?(::OpenIDConnect::AccessToken)
+        # ここで id_token を decode できない。key_or_secret() に header を渡せない.
         @user_info = access_token.userinfo!
         return @user_info
       end
@@ -558,6 +559,13 @@ module OmniAuth
 
       def new_nonce
         session['omniauth.nonce'] = SecureRandom.hex(16)
+      end
+
+
+      # @override
+      def script_name
+        return '' if @env.nil?
+        super
       end
 
 

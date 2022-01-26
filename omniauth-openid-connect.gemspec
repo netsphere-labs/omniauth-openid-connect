@@ -25,6 +25,14 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
+  spec.metadata = {
+    'bug_tracker_uri' => 'https://github.com/netsphere-labs/omniauth-openid-connect/issues',
+    'changelog_uri' => 'https://github.com/netsphere-labs/omniauth-openid-connect/releases',
+    'documentation_uri' => "https://github.com/netsphere-labs/omniauth-openid-connect/tree/v#{spec.version}#readme",
+    'source_code_uri' => "https://github.com/netsphere-labs/omniauth-openid-connect/tree/v#{spec.version}",
+    'rubygems_mfa_required' => 'true',
+  }
+  
 =begin
   このパッケージは, これらと同時に使われるのが考えられる;
     - omniauth-facebook

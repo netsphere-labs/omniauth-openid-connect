@@ -18,7 +18,7 @@ module OmniAuth
         assert_equal false, strategy.options.discovery
       end
 
-      
+
       def test_uid
         assert_equal user_info.sub, strategy.uid
 
@@ -271,6 +271,7 @@ module OmniAuth
         nonce = SecureRandom.hex(16)
         # 'code' => authorization_code
         request.stubs(:params).returns('code' => code, 'state' => state)
+        # path = script_name + path_info. 
         request.stubs(:path_info).returns('')
 
         strategy.options.issuer = 'http://example.com'
@@ -520,7 +521,7 @@ module OmniAuth
         code = SecureRandom.hex(16)
         state = SecureRandom.hex(16)
         nonce = SecureRandom.hex(16)
-        request.stubs(:params).returns('code' => code,'state' => state)
+        request.stubs(:params).returns('code' => code, 'state' => state)
         request.stubs(:path_info).returns('')
 
         strategy.options.issuer = 'http://example.com'
@@ -547,7 +548,7 @@ module OmniAuth
         code = SecureRandom.hex(16)
         state = SecureRandom.hex(16)
         nonce = SecureRandom.hex(16)
-        request.stubs(:params).returns('code' => code,'state' => state)
+        request.stubs(:params).returns('code' => code, 'state' => state)
         request.stubs(:path_info).returns('')
 
         strategy.options.issuer = 'http://example.com'
