@@ -10,9 +10,9 @@ The new project is here:
 This is a part of the OmniAuth project.
 I (Horikawa) also participate.
 
-My project has a large number of changes, so a bit of time is needed until that changes are merged into a new project. And then, I will archive it.
+My project has a large number of changes, so a bit of time is needed until that changes are merged into a new project. And then, I will archive mine.
 
-A new project is open. We welcome your participation. Thank you.
+The new project is open. We welcome your participation. Thank you.
 
 
 
