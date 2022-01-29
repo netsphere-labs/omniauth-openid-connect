@@ -1,3 +1,20 @@
+# A new joint project launched
+
+I am pleased to inform you.
+
+The original `omniauth-openid-connect` package has been not maintained long a long time. So many many forks have been created and maintained individually.
+
+On 29th January 2022, some repository maintainers agreed to create a new joint project and consolidate our projects there.
+The new project is here: 
+  https://github.com/omniauth/omniauth_openid_connect/
+This is a part of the OmniAuth project.
+I (Horikawa) also participate.
+
+My project has a large number of changes, so a bit of time is needed until that changes are merged into a new project. And then, I will archive it.
+
+A new project is open. We welcome your participation. Thank you.
+
+
 
 # OmniAuth::OpenIDConnect renewed
 
