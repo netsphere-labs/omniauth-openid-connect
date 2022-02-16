@@ -122,7 +122,8 @@ And then execute:
 
 ## Usage
 
-A sample Rails program: https://gitlab.com/netsphere/rails-examples/-/tree/main/omniauth-oidc-rp-sample/
+A sample Rails + OmniAuth program: https://gitlab.com/netsphere/rails-omniauth-oidc-rp-sample/
+(1) OpenID Connect Authorization Code Flow によるログイン, (2) 同 Implicit Flow によるログイン. (3) OpenID Connect RP-Initiated Logout 1.0 によるシングルログアウト (SLO).
 
 Manual: https://www.nslabs.jp/omniauth-openid-connect.rhtml
 
