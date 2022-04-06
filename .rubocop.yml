@@ -50,6 +50,9 @@ Metrics/BlockLength:
 Metrics/MethodLength:
   Max: 45
 
+Metrics/ClassLength:
+  Max: 500
+
 AllCops:
   Exclude:
     - bin/**/*

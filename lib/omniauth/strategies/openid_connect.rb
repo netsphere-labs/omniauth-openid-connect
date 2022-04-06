@@ -209,7 +209,7 @@ module OmniAuth
           {}
         else
           { raw_info: fix_user_info(user_info).raw_attributes }
-        end 
+        end
       end
 
       credentials do
@@ -282,7 +282,7 @@ module OmniAuth
         discover! if options.discovery
 
         if configured_response_type != 'code' &&
-             configured_response_type != 'id_token token'
+            configured_response_type != 'id_token token'
           raise ArgumentError, 'Invalid response_type'
         end
         if configured_response_type == 'id_token token'
@@ -313,16 +313,16 @@ module OmniAuth
           error_description =
             params['error_description'] || params['error_reason']
           raise CallbackError.new(
-                  params['error'],
-                  error_description, # optional
-                  params['error_uri']
-                ) # optional
+            params['error'],
+            error_description, # optional
+            params['error_uri']
+          ) # optional
         end
         if session['omniauth.state'] &&
-             (
-               params['state'].to_s.empty? ||
-                 params['state'] != session.delete('omniauth.state')
-             )
+            (
+              params['state'].to_s.empty? ||
+                params['state'] != session.delete('omniauth.state')
+            )
           # RFC 6749 4.1.2: クライアントからの認可リクエストに stateパラメータ
           # が含まれていた場合は, そのまま返ってくる. [REQUIRED]
           raise CallbackError.new(:csrf_detected, "Invalid 'state' parameter")
@@ -391,13 +391,9 @@ module OmniAuth
           # Others
           state: new_state,
           response_mode: options.response_mode,
-          nonce:
-            (
-              if options.send_nonce ||
-                   configured_response_type == 'id_token token'
-                new_nonce
-              end
-            ),
+          nonce: nonce(options.send_nonce ||
+            configured_response_type == 'id_token token'),
+          hd: options.hd,
           hd: options.hd
         }
 
@@ -479,12 +475,12 @@ module OmniAuth
 
         if config.respond_to?(:token_endpoint_auth_methods_supported)
           if config.token_endpoint_auth_methods_supported.include?(
-               'client_secret_basic'
-             )
+            'client_secret_basic'
+          )
             options.client_auth_method = :basic
           elsif config.token_endpoint_auth_methods_supported.include?(
-                'client_secret_post'
-              )
+            'client_secret_post'
+          )
             options.client_auth_method = :secret_in_body
           end
         end
@@ -600,8 +596,8 @@ module OmniAuth
         session['omniauth.state'] = state || SecureRandom.hex(16)
       end
 
-      def new_nonce
-        session['omniauth.nonce'] = SecureRandom.hex(16)
+      def nonce(force = false)
+        session['omniauth.nonce'] ||= force ? SecureRandom.hex(16) : nil
       end
 
       # @override
@@ -640,7 +636,7 @@ module OmniAuth
 
         # post_logout_redirect_uri を指定する場合は, id_token_hint 必須.
         URI.encode_www_form(
-#          id_token_hint: raise('Not Implemented Error'), # TODO: impl. [REQUIRED] hintなのに必須とはどういうこと?
+          #          id_token_hint: raise('Not Implemented Error'), # TODO: impl. [REQUIRED] hintなのに必須とはどういうこと?
           post_logout_redirect_uri: options.post_logout_redirect_uri
         )
       end
@@ -712,7 +708,7 @@ module OmniAuth
         decoded_id_token.verify!(
           issuer: issuer,
           client_id: client_options.identifier,
-          nonce: session.delete('omniauth.nonce')
+          nonce: nonce
         )
       end
 
