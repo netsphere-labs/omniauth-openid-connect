@@ -8,9 +8,10 @@ require 'minitest/autorun'
 require 'mocha/minitest'
 require 'faker'
 #require 'active_support'
+require 'omniauth'
 
 #SimpleCov.command_name 'test'
-SimpleCov.start do # 最初に実行すること.
+SimpleCov.start do
   add_filter '/test/'
 end
 

@@ -73,7 +73,7 @@ module OmniAuth
 
       option :discovery, false
 
-      # Required if you don't use 'discovery'.
+      # Required if you set 'discovery:false'.
       # IdP's public keys. NOT client's.
       option :client_jwk_signing_key
       option :client_x509_signing_key
@@ -259,7 +259,7 @@ module OmniAuth
 
 
       # @override
-      # request_phase() と callback_phase() の開始前に呼び出される.
+      # Called before both of request_phase() and callback_phase()
       def setup_phase
         super
         raise TypeError if !options.issuer.is_a?(String)
@@ -284,7 +284,7 @@ module OmniAuth
 
         if configured_response_type != 'code' &&
            configured_response_type != 'id_token token'
-          raise ArgumentError, "Invalid response_type"
+          raise ArgumentError, "Not supported response_type"
         end
         if configured_response_type == 'id_token token'
           if client_options.secret
@@ -409,20 +409,18 @@ module OmniAuth
       # @return [JSON::JWK::Set or JSON::JWK] IdP's RSA public keys. NOT client's.
       def public_key(kid = nil)
         # [Security issue] Do not call key_or_secret() here.
-        
-        if options.discovery
-          # ここで jwks_uri へのアクセスが発生.
-          config().jwks # setのままでOK
-        else
-          if options.client_jwk_signing_key
-            return OmniAuth::OpenIDConnect.parse_jwk_key(
+
+        # ここで jwks_uri へのアクセスが発生. setのままでOK
+        return config.jwks if options.discovery
+
+        if options.client_jwk_signing_key
+          return OmniAuth::OpenIDConnect.parse_jwk_key(
                      options.client_jwk_signing_key, kid)
-          elsif options.client_x509_signing_key
-            return OmniAuth::OpenIDConnect.parse_x509_key(
+        elsif options.client_x509_signing_key
+          return OmniAuth::OpenIDConnect.parse_x509_key(
                      options.client_x509_signing_key, kid)
-          end
-          raise ArgumentError, "internal error: missing RSA public key"
         end
+        raise RuntimeError, "internal error: missing RSA public key"
       end
 
 
@@ -582,20 +580,21 @@ module OmniAuth
       # HMAC-SHA256 の場合は, client_secret を共通鍵とする
       # RSAの場合は, 認証サーバの公開鍵を使う
       def key_or_secret header
-        raise TypeError if !header
-        
+        raise TypeError if !header.respond_to?(:[])
+
         case header['alg'].to_sym
         when :HS256, :HS384, :HS512
-          client_options.secret
+          return client_options.secret
         when :RS256, :RS384, :RS512
           # public_key() のなかで, :client_jwk_signing_key と
           # :client_x509_signing_key を参照する
-          public_key(header['kid'])
+          return public_key(header['kid'])
         else
           # ES256 : ECDSA using P-256 curve and SHA-256 hash
           raise ArgumentError, "unsupported alg: #{header['alg']}"
         end
       end
+
 
       # [Security issue] Do not use params['redirect_uri']
       #def redirect_uri
@@ -622,17 +621,18 @@ module OmniAuth
       end
 
 
-      # Implicit Flow:
-      # id_token と同時に access token を得る. id_token または access token の
-      # いずれかが改竄されている risk がある。(Token Hijacking)
-      # そのため,
-      # (1) IdP の公開鍵によって, id_token の署名を検証しなければならない.
-      #     header で鍵を選ぶのではなく, 公開鍵決め打ちにしなければならない.
-      # (2) access token を id_token によって検証しなければならない.
+      # The Implicit Flow:
+      # Get an access token at the same time as id_token. There is a risk that
+      # one of them has been tampered with. (Token Hijacking)
+      # For that reason,
+      # (1) You MUST verify the signature of the id_token by the public key of
+      #     IdP. Instead of choosing the key with the response header, you have
+      #     to use always the public key.
+      # (2) The access token must be validated by the id_token.
       def implicit_flow_callback_phase
         if !params['access_token'] || !params['id_token']
-          raise OmniAuth::OpenIDConnect::MissingIdTokenError,
-                "Missing 'access_token' or 'id_token' param"
+          fail! :missing_id_token,
+                OmniAuth::OpenIDConnect::MissingIdTokenError.new(params['error'])
         end
 
         # このなかで署名の検証も行う. => JSON::JWS::VerificationFailed
@@ -650,6 +650,7 @@ module OmniAuth
       end
 
 
+      # 'code', ['id_token', 'token'], or [:id_token, :token]
       def configured_response_type
         if !@configured_response_type
           ary = case options.response_type
