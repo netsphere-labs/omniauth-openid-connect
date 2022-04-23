@@ -420,7 +420,8 @@ module OmniAuth
           return OmniAuth::OpenIDConnect.parse_x509_key(
                      options.client_x509_signing_key, kid)
         end
-        raise RuntimeError, "internal error: missing RSA public key"
+
+        raise 'internal error: missing RSA public key'
       end
 
 
@@ -577,18 +578,18 @@ module OmniAuth
       end
 
 
-      # HMAC-SHA256 の場合は, client_secret を共通鍵とする
-      # RSAの場合は, 認証サーバの公開鍵を使う
+      # @return For HMAC-SHA256, return client_secret as the common key.
+      #         For RSA, return the public key of the authentication server
       def key_or_secret header
         raise TypeError if !header.respond_to?(:[])
 
         case header['alg'].to_sym
         when :HS256, :HS384, :HS512
-          return client_options.secret
+          client_options.secret
         when :RS256, :RS384, :RS512
           # public_key() のなかで, :client_jwk_signing_key と
           # :client_x509_signing_key を参照する
-          return public_key(header['kid'])
+          public_key(header['kid'])
         else
           # ES256 : ECDSA using P-256 curve and SHA-256 hash
           raise ArgumentError, "unsupported alg: #{header['alg']}"
@@ -633,6 +634,7 @@ module OmniAuth
         if !params['access_token'] || !params['id_token']
           fail! :missing_id_token,
                 OmniAuth::OpenIDConnect::MissingIdTokenError.new(params['error'])
+          return
         end
 
         # このなかで署名の検証も行う. => JSON::JWS::VerificationFailed
@@ -650,17 +652,21 @@ module OmniAuth
       end
 
 
-      # 'code', ['id_token', 'token'], or [:id_token, :token]
+      # Normalize options.response_type.
+      #   'code', ['id_token', 'token'], or [:id_token, :token]
+      # @return [String] 'code' or 'id_token token'
       def configured_response_type
         if !@configured_response_type
           ary = case options.response_type
-                  when Array; options.response_type
-                  when Symbol; [options.response_type]
-                  else options.response_type.split(/[ \t]+/)
+                when Array  then options.response_type
+                when Symbol then [options.response_type]
+                else 
+                  options.response_type.split(/[ \t]+/)
                 end
           @configured_response_type = ary.sort.join(' ')
         end
-        return @configured_response_type
+
+        @configured_response_type
       end
 
 

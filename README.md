@@ -137,7 +137,7 @@ Manual: https://www.nslabs.jp/omniauth-openid-connect.rhtml
 | `discovery`                    | Should OpenID discovery be used. This is recommended if the IdP provides a discovery endpoint. See client config for how to manually enter discovered values. <br />one of: true, false | no       | false                                                   |
 | `client_auth_method`           | Which authentication method to use to authenticate your app with the authorization server's token endpoint <br />`:basic`, `:secret_in_body`                  | no       | Sym: basic                                                  |
 | scope                        | Which OpenID scopes to include (`:openid` is always required)  <br />[:openid, :profile, :email]                                                                                                 | no       | Array<sym> [:openid]                          |
-| response_type                | Which OAuth2 response type to use with the authorization request. <br />one of: 'code', ['id_token', 'token']  <br />**Security note:** Do not use 'token' or 'id_token'. The 'token' (raw OAuth 2.0) MUST NOT be used for the authentication purpose. The 'id_token' is used only for the Self-Issued OpenID Providers. Instead, use ['id_token', 'token'] (the Implicit Flow).              | no       | String: code                                       |
+| `response_type`                | Which OAuth2 response type to use with the authorization request. <br />one of: 'code', ['id_token', 'token']  <br />**Security note:** Do not use 'token'. The 'token' (raw OAuth 2.0) MUST NOT be used for the authentication purpose.               | no       | String: code                                       |
 | state                        | A value to be used for the OAuth2 state parameter on the authorization request. Can be a proc that generates a string. <br />`Proc.new {SecureRandom.hex(32)}`                                       | no       | Random 16 character string                    |
 | `response_mode`                | The response mode per [OAuth 2.0 Form Post Response Mode](https://openid.net/specs/oauth-v2-form-post-response-mode-1_0.html) <br />one of: :query, :fragment, :form_post, :web_message                                                             | No. [NOT RECOMMENDED]  | nil                       |
 | display                      | An optional parameter to the authorization request to determine how the authorization and consent page <br />one of: :page, :popup, :touch, :wap                                                        | no       | nil                                        |
@@ -157,9 +157,11 @@ Manual: https://www.nslabs.jp/omniauth-openid-connect.rhtml
   **NOTE**: if you use this gem with Devise you should use `:openid_connect` name,
   or Devise would route to 'users/auth/:provider' rather than 'users/auth/openid_connect'
 
-  * `response_type` tells the authorization server which grant type the application wants to use,
-  currently, only `'code'` (Authorization Code grant) and `['id_token', 'token']` (Implicit grant) are valid.
-  Do not use `id_token`. This is valid only under Self-Issued OpenID Providers.
+  * `response_type` tells the authorization server which grant type the application wants to use. `'code'` (Authorization Code grant) and `['id_token', 'token']` (Implicit grant) are valid.
+  omniauth/omniauth_openid_connect repository accepts `'code'` and `'id_token'`.
+  The `id_token` can be used only for the extended IdPs. 
+  Some IdPs (for example Azure AD) add an email address and some fields that identify the user to the authentication response. 
+  Otherwise, you must use `[:id_token, :token]` for the Implicit Flow. The client requests the user information using the authentication response.
 
   * If you want to pass `state` paramete by yourself. You can set Proc Object.
   e.g. `state: Proc.new { SecureRandom.hex(32) }`
