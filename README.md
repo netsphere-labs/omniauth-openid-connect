@@ -10,8 +10,6 @@ The new project is here:
 This is a part of the OmniAuth project.
 I (Horikawa) also participate.
 
-My project has a large number of changes, so a bit of time is needed until that changes are merged into a new project. And then, I will archive mine.
-
 The new project is open. We welcome your participation. Thank you.
 
 
@@ -158,10 +156,10 @@ Manual: https://www.nslabs.jp/omniauth-openid-connect.rhtml
   or Devise would route to 'users/auth/:provider' rather than 'users/auth/openid_connect'
 
   * `response_type` tells the authorization server which grant type the application wants to use. `'code'` (Authorization Code grant) and `['id_token', 'token']` (Implicit grant) are valid.
-  omniauth/omniauth_openid_connect repository accepts `'code'` and `'id_token'`.
-  The `id_token` can be used only for the extended IdPs. 
+  `omniauth/omniauth_openid_connect` repository accepts `'code'` and `'id_token'`.
+  <span style="color:red">**The `id_token` response type can be used only for the extended IdPs. 
   Some IdPs (for example Azure AD) add an email address and some fields that identify the user to the authentication response. 
-  Otherwise, you must use `[:id_token, :token]` for the Implicit Flow. The client requests the user information using the authentication response.
+  Otherwise, you must use `[:id_token, :token]` for the Implicit Flow. The client requests the user information using the authentication response.**</span>
 
   * If you want to pass `state` paramete by yourself. You can set Proc Object.
   e.g. `state: Proc.new { SecureRandom.hex(32) }`
