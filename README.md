@@ -1,6 +1,13 @@
-# A new joint project launched
+# Recommend omitting OmniAuth
+The OmniAuth library is still maintained. You always use it with some authentication framework. However, if you combine it with the OpenId Connect library, the both libraries handle multi-providers. That's gilding the lily.
 
-I am pleased to inform you.
+Therefore, it is good to combine an authentication framework, which the good one is Sorcery, directly with the OpenId Connect library without using OmniAuth.
+
+
+
+# OmniAuth::OpenIDConnect renewed
+
+## A new joint project launched
 
 The original `omniauth-openid-connect` package has been not maintained long a long time. So many many forks have been created and maintained individually.
 
@@ -13,8 +20,7 @@ I (Horikawa) also participate.
 The new project is open. We welcome your participation. Thank you.
 
 
-
-# OmniAuth::OpenIDConnect renewed
+## What is this?
 
 Authentication strategy using OpenID Connect for OmniAuth2. 
 
