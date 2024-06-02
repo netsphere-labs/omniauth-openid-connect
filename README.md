@@ -1,4 +1,4 @@
-# Recommend omitting OmniAuth
+# Recommend to remove OmniAuth
 The OmniAuth library is still maintained. You always use it with some authentication framework. However, if you combine it with the OpenId Connect library, the both libraries handle multi-providers. That's gilding the lily.
 
 Therefore, it is good to combine an authentication framework, which the good one is Sorcery, directly with the OpenId Connect library without using OmniAuth.
